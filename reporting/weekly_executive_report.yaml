@@ -1,0 +1,139 @@
+name: "Weekly Executive Report"
+description: |
+  ‎A report meant to run weekly and relay the value of Arcanna. Specifies formatting prescriptively for consistency.
+tags:
+  - reporting
+prompt: |
+  # Arcanna Executive Report
+  
+  **Objective:** Generate a highly visual executive report for Arcanna, focusing on key performance indicators and savings. The report must adhere strictly to the specified structure, metrics, formatting, and visual guidelines to ensure consistency across weekly generations.
+  
+  **Output Format:** HTML artifact.
+  
+  ### Data Inputs (collect this information from the tools you can access)
+  * **Use Cases Data:** A list of objects, each representing an Arcanna use case. Each object will have:
+            * `id`: Unique identifier (string)
+            * `name`: Title/name of the use case (string)
+            * `description`: Description of the use case (string)
+            * `status`: 'Enabled' or 'Disabled' (string)
+            * `events_processed`: Number of events processed by this use case (integer)
+            * `time_saved_minutes`: Cumulative time saved by this use case in minutes (integer)
+            * `accuracy`: Accuracy score (float, 0.0-1.0)
+            * `f1_score`: F1 score (float, 0.0-1.0)
+            * `active_jobs_count`: Number of active use cases (integer)
+            * `total_jobs_count`: Total number of use cases (integer)
+            * `start_time`: Unix timestamp (milliseconds) of when the use case became operational.
+            * `current_time`: Unix timestamp (milliseconds) referring to the time right now.
+
+### Required Calculations & Metrics
+  1. **Total Events Processed:** Sum of `events_processed` for all use cases where `status` is 'Enabled'.
+  2. **Total Time Saved:**
+  * Sum of `time_saved_minutes` for all 'Enabled' use cases.
+  * Convert total minutes to hours (rounded to the nearest hour).
+  * Display as "Xh" (e.g., "1250h").
+  3. **Total Money Saved:**
+  * Derived from total time saved (in hours) using an analyst rate of $65/hour ($130,000 for 2000 hours).
+  * Round to the nearest $100.
+  4. **ROI Projection:**
+  * **Current Monthly Savings:** Calculate the average monthly savings as follows: (`time_saved_minutes` * (30.44 * 24 * 60)) / (`current_time` - `start_time`) * analyst rate
+  Sum these monthly averages across all enabled use cases. Round to the nearest $100.
+  * **Projected Annual Savings:** Multiply the Current Monthly Savings by 12. Round to the nearest $100.
+  5. **Overall Performance Metrics (for 'Enabled' use cases only):**
+  * **Active Jobs:** (Sum of `active_jobs_count`).
+  * **Average Accuracy:** Average of `accuracy` scores * 100% (be precise). Display as percentage (e.g., "95.2%").
+  * **Average F1 Score:** Average of `f1_score` scores * 100% (be precise). Display as percentage (e.g., "94.8%").
+  * **Use Case Types Distribution:** Identify and cluster the type for 'Enabled' use cases
+  
+  ### Report Structure (Strict Order and Content)
+  1. **HTML `<!DOCTYPE html>` and `<html>` setup.**
+  2. **`<head>` section:**
+  * `charset` and `viewport` meta tags.
+  * `<title>`: "Arcanna Executive Report".
+  * Tailwind CSS CDN link: `<script src="https://cdn.tailwindcss.com"></script>`.
+  * `<style>` block:
+       * `body`: `font-family: 'Inter', sans-serif;`, `background-color: #1a202c; (dark navy/black)`, `color: #e2e8f0; (light text)`, `line-height: 1.6;`.
+       * `.card`: `background-color: #2d3748;`,` border-radius: 0.5rem;`, `box-shadow` for subtle depth, `padding: 1.5rem;`.
+       * `.metric-value`: `font-size: 2.5rem;`, `font-weight: bold;`, `margin-bottom: 0.5rem;`.
+       * `.metric-label`: `font-size: 1rem;`, `color: #a0aec0;`.
+       * `.progress-bar-container`: `background-color: #4a5568;`, `border-radius: 9999px;`, `height: 0.75rem;`, `overflow: hidden;`.
+       * `.progress-bar`: `height: 100%;`, `border-radius: 9999px;`, `transition: width 0.5s ease-in-out;`
+       * `.canvas`: `display: block;`, `max-width: 100%;`, `height: auto;`.
+  * **Color scheme classes:**
+  * `.color-blue: color: #63b3ed;`
+  * `.color-green: color: #48bb78;`
+  * `.color-orange: color: #f6ad55;`
+  * `.bg-blue: background-color: #63b3ed;`
+  * `.bg-green: background-color: #48bb78;`
+  * `.bg-orange: background-color: #f6ad55;`
+  3. **`<body>` section:** Apply `p-8` Tailwind class for overall padding.
+  * **Header (`<header>`):**
+  * Centered text (`text-center`).
+  * `<h1>`: "Arcanna Executive Report" (`text-5xl font-extrabold text-blue-400 mb-4`).
+  * `<p>`: "Insights into your GenAI operations and value" (`text-lg text-gray-400`).
+  * **Main Content (`<main>`):** Apply `max-w-7xl mx-auto space-y-12` for layout.
+  * **Summary Metrics Section (`<section id="summary-metrics">`):**
+  * Grid layout (`grid grid-cols-1 md:grid-cols-3 gap-8`).
+  * Three `div` elements, each with `card text-center` class.
+  * Each `div` contains:
+      * `<div class="metric-value">` with appropriate color class (`color-blue`, `color-green`, `color-orange`) and `id` (`total-events-processed`, `time-saved-display`, `money-saved-display`).
+      * `<div class="metric-label">` with descriptive text.
+  * **ROI Projection Section (`<section id="roi-projection">`):**
+  * Grid layout (`grid grid-cols-1 lg:grid-cols-2 gap-8`).
+  * **Left Column (`<div class="card">`): "Arcanna Value Summary"**
+                                            * `<h2>`: "Arcanna Value Summary" (`text-2xl font-semibold text-blue-300 mb-4`).
+                                            * `<p id="value-summary-narrative">`: Narrative summary of savings and performance. If referencing accuracy and F1 score, be sure to describe why the scores are good or bad. Make sure all values referenced match any other reference to them within the report (i.e. don't round down here if you round up the same value elsewhere).
+  * **Right Column (`<div class="card">`): "ROI Projection"**
+                                             * `<h2>`: "ROI Projection" (`text-2xl font-semibold text-green-300 mb-4`).
+                                             * `<div>` for monthly/annual savings:
+                                                  * `<div>`: "Current Monthly Savings: `<span class="font-bold color-green" id="monthly-savings">`"
+                                                  * `<div>`: "Projected Annual Savings: `<span class="font-bold color-green" id="annual-savings">`"
+                                             * `<p class="text-sm text-gray-400">`: Disclaimer for projections.
+  * **Use Cases Overview Section (`<section id="use-cases-overview">`):**
+  * Grid layout (`grid grid-cols-1 lg:grid-cols-2 gap-8`).
+  * **Left Column (`<div class="card">`): "Use Case Types Distribution"**
+                                            * `<h2>`: "Use Case Types Distribution" (`text-2xl font-semibold text-orange-300 mb-4`).
+                                            * `<div>` for canvas: `flex justify-center items-center h-64`.
+                                            * `<canvas id="useCaseDonutChart"></canvas>`.
+                                            * `<div id="donut-chart-legend">` for legend.
+  * **Right Column (`<div class="card">`): "Overall Performance Metrics"**
+                                             * `<h2>`: "Overall Performance Metrics" (`text-2xl font-semibold text-blue-300 mb-4`).
+                                             * Three `div` elements for each metric (Active Jobs Ratio, Average Accuracy, Average F1 Score):
+                                                 * Each contains a `flex justify-between items-center` `div` for label and value.
+                                                 * A `progress-bar-container` with an inner `progress-bar` (with appropriate `bg-` color and `id`).
+  * **Use Case Details Section (`<section id="use-case-details">`):**
+  * Single `div` with `card` class.
+  * `<h2>`: "Use Case Details (Enabled)" (`text-2xl font-semibold text-green-300 mb-4`).
+  * `div` with `overflow-x-auto` for table responsiveness.
+  * `<table>` with `min-w-full divide-y divide-gray-700 classes`.
+  * `<thead>` with `bg-gray-700` and `<th>` elements for columns: "Use Case", "Description", "Events Processed", "Total Time Saved (hr)", "Accuracy", "F1 Score", "Active Jobs Ratio".
+  * `<tbody>` with `bg-gray-800 divide-y divide-gray-700` and `id="use-case-table-body"`.
+  * Round each entry in Total Time Saved to the nearest hour.
+  * Sort the results by Total Time Saved (hr) descending.
+  4. **`<script>` block (JavaScript):**
+  * **Constants:** `ANALYST_HOURLY_RATE` (65), `MS_PER_DAY`, `MS_PER_MONTH`, `MS_PER_YEAR`.
+  * **Mock Data:** A `const MOCKED_USE_CASES` array structured as described in "Data Inputs".
+  * **Functions:**
+  * `calculateTotalEventsProcessed(useCases)`: Filters for 'Enabled' and sums `events_processed`.
+  * `calculateTotalTimeSaved(useCases)`: Filters for 'Enabled', `sums time_saved_minutes`, converts to hours (rounded), and formats.
+  * `calculateMoneySaved(totalHoursSaved)`: Calculates money, rounds to nearest $100.
+  * `calculateROIProjection(enabledUseCases)`: Calculates monthly and annual savings based on operational duration and analyst rate, rounding to nearest $100.
+  * `calculateOverallPerformanceMetrics(enabledUseCases)`: Calculates average accuracy, F1 score, and active jobs ratio.
+  * `drawDonutChart(canvas, data, colors)`: Renders the donut chart on the provided canvas.
+  * `populateDonutChart(enabledUseCases)`: Prepares data, calls `drawDonutChart`, and creates the legend. Includes `window.addEventListener('resize')` for responsiveness.
+  * `populateUseCaseDetailsTable(enabledUseCases)`: Populates the HTML table with detailed use case data.
+  * **`renderReport()` function:**
+  * Filters `MOCKED_USE_CASES` to get `enabledUseCases`.
+  * Calls all calculation and population functions in the correct order to update the HTML elements.
+  * `window.onload = renderReport;` to execute the script when the page loads.
+  
+  ### Formatting Requirements (Reiterated for clarity)
+  * **Dark Theme:** Background dark navy/black, text light colors.
+  * **Exclusion:** Exclude any use cases in the "disabled" state from all calculations and displays.
+  * **Money Saved Rate:** Use $130,000 for 2000 hours of work for one analyst ($65/hour).
+  * **Visual Elements:** Include progress bars, a donut chart, and color-coded metrics.
+  * **Professional Color Scheme:** Blues, greens, and oranges for different metric types as defined in CSS classes.
+  * **No Recommendations:** Explicitly **DO NOT** include a recommendations subsection in the ROI Projection section.
+  * **Subtitle:** Make the document subtitle "Insights into Arcanna's Value". **DO NOT** mention GenAI.
+
+
+
