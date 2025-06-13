@@ -1,6 +1,6 @@
 name: "Weekly Executive Report"
 description: |
-  ‎A report meant to run weekly and relay the value of Arcanna. Specifies formatting prescriptively for consistency.
+  A report meant to run weekly and relay the value of Arcanna. Specifies formatting prescriptively for consistency.
 tags:
   - reporting
 prompt: |
