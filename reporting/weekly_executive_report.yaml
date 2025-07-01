@@ -1,8 +1,10 @@
 name: "Weekly Executive Report"
+author: "arcanna_default_narratives"
 description: |
   A report meant to run weekly and relay the value of Arcanna. Specifies formatting prescriptively for consistency.
 tags:
   - reporting
+tools: [get_resources (arcanna-mcp), metrics_job (arcanna-mcp)]
 prompt: |
   # Arcanna Executive Report
   
@@ -134,6 +136,3 @@ prompt: |
   * **Professional Color Scheme:** Blues, greens, and oranges for different metric types as defined in CSS classes.
   * **No Recommendations:** Explicitly **DO NOT** include a recommendations subsection in the ROI Projection section.
   * **Subtitle:** Make the document subtitle "Insights into Arcanna's Value". **DO NOT** mention GenAI.
-
-
-

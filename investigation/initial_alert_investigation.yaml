@@ -1,15 +1,17 @@
 name: "Initial Alert Investigation"
+author: "arcanna_default_narratives"
 description: |
   This Narrative provides an end-to-end initial investigation to increase confidence in whether or not the initial alert in question requires deep-dive review and remediation. Generally this would be applied to an alert that (on its own) can't easily be identified as malicious or benign.
 tags:
   - investigation
+tools: [*]
 prompt: |
-  # Alert Investigation Protocol
+# Alert Investigation Protocol
   This document outlines procedures for investigating alert "${alert_id}" (referred to as "the alert" throughout).
 
-  ## Initial Alert Analysis
+## Initial Alert Analysis
 
-  If it hasn't already been collected, collect the following information about the alert:
+If it hasn't already been collected, collect the following information about the alert:
   - Alert type and data source category (endpoint, network, email, etc.)
   - MITRE ATT&CK tactics identified (if none, tell the user *and* identify what the likeliest tactics are and why)
   - Vendor confidence level
@@ -18,9 +20,9 @@ prompt: |
   - User context information
   - Host information (must include host name)
 
-  ## Triage Decision
+## Triage Decision
 
-  Check Arcanna's decision for this alert:
+Check Arcanna's decision for this alert:
   - Retrieve the Decision name from Arcanna if it is not already present
   - If Arcanna's decision is "Drop" (or a similar negative label) with confidence score ≥50%, proceed directly to Final Report. Do not collect additional context.
   - Otherwise, continue with the full investigation
@@ -28,88 +30,89 @@ prompt: |
   ## CRITICAL ALERT LIMIT:
   - **MANDATORY RULE**: After each step, count and explicitly state the total number of alerts gathered.
   - **HARD STOP CONDITION**: Upon reaching or exceeding 10 total alerts, you MUST IMMEDIATELY:
-    1. Stop all data collection
-    2. Skip directly to the Attack Chain Analysis section
-    3. Clearly inform the user: "Investigation shortened to prevent token limit issues."
-    4. Do NOT process or gather any further information under any circumstances
-    5. Include recommendations for the user to complete remaining steps manually
+             1. Stop all data collection
+             2. Skip directly to the Attack Chain Analysis section
+             3. Clearly inform the user: "Investigation shortened to prevent token limit issues."
+             4. Do NOT process or gather any further information under any circumstances
+             5. Include recommendations for the user to complete remaining steps manually
 
   ## Additional Guidelines:
   - Ensure all HTML content displays clearly on dark backgrounds.
-  - Create a Generated Report artifact only for the Final Report.
+  - Create a Generated Report artifact only for the Final Report. **Be certain it is in HTML format.**
+  - **NEVER** use `add_agentic_notes` from `arcanna-mcp`
 
-  ## Related Alert Investigation
+## Related Alert Investigation
 
-  1. **Host-Based TTPs Context**: Analyze alerts on the same host with matching MITRE ATT&CK tactics from the past 7 days relative to the alert’s timestamp
-     - If no MITRE ATT&CK tactics were known, let the user know and move to Artifact-Based Context
-     - When creating your query, exclude the original alert (by its ID)
-     - Limit to 5 most recent alerts if more exist
-     - Note volume and timespan of excluded alerts if limit reached
+1. **Host-Based TTPs Context**: Analyze alerts on the same host with matching MITRE ATT&CK tactics from the past 7 days relative to the alert's timestamp
+  - If no MITRE ATT&CK tactics were known, let the user know and move to Artifact-Based Context
+  - When creating your query, exclude the original alert (by its ID)
+  - Limit to 5 most recent alerts if more exist
+  - Note volume and timespan of excluded alerts if limit reached
 
-  2. **Host-Based Time-Grouped Context**: Analyze a limited number of alerts on the same host within ±3 days relative to the alert’s timestamp
-     - When creating your query, exclude all collected alerts (by their IDs)
-     - Limit to 5 most recent alerts if more exist
-     - If the time range and query was already performed as part of Host-Based TTPs Context, do not repeat the query and let the user know why. Otherwise, continue.
-     - Exclude the original alert
-     - Note volume and timespan of excluded alerts if limit reached
+2. **Host-Based Time-Grouped Context**: Analyze a limited number of alerts on the same host within ±3 days relative to the alert's timestamp
+  - When creating your query, exclude all collected alerts (by their IDs)
+  - Limit to 5 most recent alerts if more exist
+  - If the time range and query was already performed as part of Host-Based TTPs Context, do not repeat the query and let the user know why. Otherwise, continue.
+  - Exclude the original alert
+  - Note volume and timespan of excluded alerts if limit reached
 
-  3. **Artifact-Based Context**: Identify other hosts affected by the same artifact within ±1 hour
-     - When creating your query, exclude all collected alerts (by their IDs)
-     - Limit to 5 alerts if more exist
-     - Document total affected systems and alert count
-     - Note if limit reached
+3. **Artifact-Based Context**: Identify other hosts affected by the same artifact within ±1 hour
+  - When creating your query, exclude all collected alerts (by their IDs)
+  - Limit to 5 alerts if more exist
+  - Document total affected systems and alert count
+  - Note if limit reached
 
-  4. **Indicator Reputation Context**: If there are any indicators (such as file hashes, domain names, and IP addresses) – and if we have access to tools that can provide reputation information about these indicators, perform reputation checks and analyze the results
-     - Do not repeat these checks if information is already included in our context
-     - Limit to 3 total checks
-     - Note if limit reached
-     - Exclude any internal IP addresses
-     - Exclude private or internal domain names
-     - Exclude well-known domains
-     - Only analyze one file hash per file
-     - Document any suspicious or malicious findings
+4. **Indicator Reputation Context**: If there are any indicators (such as file hashes, domain names, and IP addresses) – and if we have access to tools that can provide reputation information about these indicators, perform reputation checks and analyze the results
+  - Do not repeat these checks if information is already included in our context
+  - Limit to 3 total checks
+  - Note if limit reached
+  - Exclude any internal IP addresses
+  - Exclude private or internal domain names
+  - Exclude well-known domains
+  - Only analyze one file hash per file
+  - Document any suspicious or malicious findings
 
-  5. **Attack Chain Analysis**: Evaluate if the sequence suggests an active attack
-     - Consider MITRE ATT&CK progression
-     - Assess relationship between alerts
-     - Determine attack likelihood
-
+5. **Attack Chain Analysis**: Evaluate if the sequence suggests an active attack
+  - Consider MITRE ATT&CK progression
+  - Assess relationship between alerts
+  - Determine attack likelihood, paying close attention to MITRE ATT&CK tactics that would indicate impact (such as Exfiltration and Impact) if it otherwise looks like testing behavior
+  
   # Final Report
-    - Create everything between here and the Feedback section as a Generated Report artifact.
-    - Include all unique alerts from this Investigation within the Timeline and Related Alerts sections.
-  ---
+  - Create everything between here and the Feedback section as a Generated Report artifact using HTML.
+  - Include all unique alerts from this Investigation within the Timeline and Related Alerts sections.
+---
 
-  ## A.) Summary
-  ### [Qualitative risk score]
-    - Use HTML, CSS, and Javascript only
-    - Qualitative risk scores are High Risk, Medium Risk, Low Risk
-    - Create a rounded rectangle filled with red (High Risk), yellow (Medium Risk), or green (Low Risk)
-    - Qualitative risk score should be in white font and be centered inside the rectangle
-    - Height should be similar to the heading
-    - Center the rectangle on the screen
+## A.) Summary
+### [Qualitative risk score]
+- Use HTML, CSS, and Javascript only
+- Qualitative risk scores are High Risk, Medium Risk, Low Risk
+- Create a rounded rectangle filled with red (High Risk), yellow (Medium Risk), or green (Low Risk)
+- Qualitative risk score should be in white font and be centered inside the rectangle
+- Height should be similar to the heading
+- Center the rectangle on the screen
 
-  ### [Concise summary of the activity]
-  ### Executive Summary: [Max 2 paragraphs]
-  ### Recommended Actions: [Bulleted list]
+### [Concise summary of the activity]
+### Executive Summary: [Max 2 paragraphs]
+### Recommended Actions: [Bulleted list]
 
-  ## B.) Timeline
+## B.) Timeline
   [Vertical chronological timeline of all alert activity discovered]
-    - Use HTML, CSS, and Javascript only
-    - Make sure that the HTML is correctly rendered
-    - Include all alerts associated with this attack
-    - Identify ATT&CK tactics
-    - Group similar alerts occurring in sequence
-    - Identify which hosts caused the alerts
-    - Highlight the original alert
+- Use HTML, CSS, and Javascript only
+- Make sure that the HTML is correctly rendered
+- Include all alerts associated with this attack
+- Identify ATT&CK tactics
+- Group similar alerts occurring in sequence
+- Identify which hosts caused the alerts
+- Highlight the original alert
 
 
-  ## C.) Related Alerts
+## C.) Related Alerts
   | Alert ID | Event Summary | Arcanna's Decision | Arcanna's Confidence | Assistant's Opinion | Rationale |
   |:----------:|:-----------|:--------------------:|:-----------------------:|:---------------------:|:-----------|
   | [Truncated IDs] | [concise alert summary] | [dot using proper color for decision label + Decision] | [Confidence as Low/Medium/High, do not show percentage] | [dot using proper color for decision label + Decision] | [Brief explanation, justify why disagreeing with Arcanna if relevant] |
-    - Highlight the original alert
-    - Add a visible border between rows
+- Highlight the original alert
+- Add a visible border between rows
 
 
-  # Feedback
+# Feedback 
   Do you agree with my analysis and recommended decisions for the alerts above? If so, let me know and I will submit this feedback directly to the use case to improve the underlying AI Model.
